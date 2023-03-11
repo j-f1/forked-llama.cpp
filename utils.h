@@ -1,6 +1,6 @@
 // Various helper functions and utilities
 
-#pragma once
+//#pragma once
 
 #include <string>
 #include <map>

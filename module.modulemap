@@ -1,0 +1,6 @@
+module LLaMAcpp {
+    header "main.h"
+    header "utils.h"
+    header "ggml.h"
+    requires cplusplus
+}
