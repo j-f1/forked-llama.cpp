@@ -754,7 +754,7 @@ bool llama_bootstrap(const char *model_path, llama_state &state) {
     return true;
 }
 
-bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama_progress)) {
+llama_stop llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama_progress)) {
     if (params.seed < 0) {
         params.seed = (int)time(NULL);
     }
@@ -856,7 +856,7 @@ bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama
 
             if (!llama_eval(state.model, params.n_threads, n_past, embd, logits, mem_per_token)) {
                 fprintf(stderr, "Failed to predict\n");
-                return false;
+                return llama_stop_error;
             }
 
             state.timing.t_predict_us += ggml_time_us() - t_start_us;
@@ -914,14 +914,11 @@ bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama
         }
 
         // deliver text
-        bool should_stop = false;
         for (auto id : embd) {
-            if (!input_noecho) printf("%s", state.vocab.id_to_token[id].c_str());
-            should_stop = progress({state.vocab.id_to_token[id]});
-            if (should_stop) break;
+            bool should_stop = progress({state.vocab.id_to_token[id]});
+            if (should_stop) return llama_stop_cancel;
         }
         if (!input_noecho) fflush(stdout);
-        if (should_stop) break;
 
         // in interactive mode, and not currently processing queued inputs;
         // check if we should prompt the user for more
@@ -970,8 +967,7 @@ bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama
 
         // end of text token
         if (embd.back() == 2) {
-            fprintf(stderr, " [end of text]\n");
-            break;
+            return llama_stop_end_of_text;
         }
     }
 
@@ -988,7 +984,7 @@ bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama
 //         fprintf(stderr, "%s:    total time = %8.2f ms\n", __func__, (t_main_end_us - t_main_start_us)/1000.0f);
     }
 
-    return true;
+    return llama_stop_limit;
 }
 
 void llama_finalize(llama_state &state) {
