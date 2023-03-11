@@ -90,6 +90,6 @@ struct llama_progress {
     gpt_vocab::token token;
 };
 
-bool llama_bootstrap(const char *model_path, llama_state &state);
+bool llama_bootstrap(const char *model_path, llama_state &state, void(^progress)(float));
 llama_stop llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama_progress));
 void llama_finalize(llama_state &state);

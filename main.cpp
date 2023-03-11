@@ -57,6 +57,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         }
     }
 
+    progress(0);
+
     int n_ff = 0;
     int n_parts = 0;
 
@@ -116,6 +118,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             //}
         }
     }
+
+    progress(0.05);
 
     // for the big tensors, we have the option to store the data in 16-bit floats or quantized
     // in order to save memory and also to speed up the computation
@@ -242,6 +246,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
         }
     }
 
+    progress(0.1);
+
     // key + value memory
     {
         const auto & hparams = model.hparams;
@@ -280,6 +286,8 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
 
         fin = std::ifstream(fname_part, std::ios::binary);
         fin.rdbuf()->pubsetbuf(f_buf.data(), f_buf.size());
+        fin.seekg(0, std::ios::end);
+        std::streampos fsize = fin.tellg();
         fin.seekg(file_offset);
 
         // load weights
@@ -451,10 +459,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
                 }
 
                 //fprintf(stderr, "%42s - [%5d, %5d], type = %6s, %6.2f MB\n", name.data(), ne[0], ne[1], ftype == 0 ? "float" : "f16", ggml_nbytes(tensor)/1024.0/1024.0);
-                if (++n_tensors % 8 == 0) {
-                    fprintf(stderr, ".");
-                    fflush(stderr);
-                }
+                progress(float(fin.tellg()) / fsize);
             }
 
             fprintf(stderr, " done\n");
@@ -737,13 +742,14 @@ const char * llama_print_system_info(void) {
 }
 
 
-bool llama_bootstrap(const char *model_path, llama_state &state) {
+bool llama_bootstrap(const char *model_path, llama_state &state, void(^progress)(float)) {
+//    printf("%s: seed = %d\n", __func__, params.seed);
 
     // load the model
     {
         const int64_t t_start_us = ggml_time_us();
 
-        if (!llama_model_load(model_path, state.model, state.vocab, 512)) {  // TODO: set context from user input ??
+        if (!llama_model_load(model_path, state.model, state.vocab, 512, progress)) {  // TODO: set context from user input ??
             fprintf(stderr, "%s: failed to load model from '%s'\n", __func__, model_path);
             return false;
         }
