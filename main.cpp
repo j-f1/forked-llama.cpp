@@ -754,7 +754,7 @@ bool llama_bootstrap(const char *model_path, llama_state &state) {
     return true;
 }
 
-bool llama_predict(gpt_params &params, llama_state &state) {
+bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama_progress)) {
     if (params.seed < 0) {
         params.seed = (int)time(NULL);
     }
@@ -913,13 +913,15 @@ bool llama_predict(gpt_params &params, llama_state &state) {
             }
         }
 
-        // display text
-        if (!input_noecho) {
-            for (auto id : embd) {
-                printf("%s", state.vocab.id_to_token[id].c_str());
-            }
-            fflush(stdout);
+        // deliver text
+        bool should_stop = false;
+        for (auto id : embd) {
+            if (!input_noecho) printf("%s", state.vocab.id_to_token[id].c_str());
+            should_stop = progress({state.vocab.id_to_token[id]});
+            if (should_stop) break;
         }
+        if (!input_noecho) fflush(stdout);
+        if (should_stop) break;
 
         // in interactive mode, and not currently processing queued inputs;
         // check if we should prompt the user for more

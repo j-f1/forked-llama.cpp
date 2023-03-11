@@ -9,6 +9,7 @@
 #include <sys/_types.h>
 #include <vector>
 #include <map>
+#include <string>
 
 #include "utils.h"
 
@@ -76,6 +77,10 @@ struct llama_state {
     } timing;
 };
 
+struct llama_progress {
+    gpt_vocab::token token;
+};
+
 bool llama_bootstrap(const char *model_path, llama_state &state);
-bool llama_predict(gpt_params &params, llama_state &state);
+bool llama_predict(gpt_params &params, llama_state &state, bool(^progress)(llama_progress));
 void llama_finalize(llama_state &state);
