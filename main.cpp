@@ -295,7 +295,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
             int n_tensors = 0;
             size_t total_size = 0;
 
-            fprintf(stderr, "%s: ", __func__);
+//             fprintf(stderr, "%s: ", __func__);
 
             while (true) {
                 int32_t n_dims;
@@ -462,7 +462,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
                 progress(0.1 + (float(fin.tellg()) / fsize) * 0.9);
             }
 
-            fprintf(stderr, " done\n");
+//             fprintf(stderr, " done\n");
 
             fprintf(stderr, "%s: model size = %8.2f MB / num tensors = %d\n", __func__, total_size/1024.0/1024.0, n_tensors);
         }
