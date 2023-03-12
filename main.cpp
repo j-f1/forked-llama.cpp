@@ -459,7 +459,7 @@ bool llama_model_load(const std::string & fname, llama_model & model, gpt_vocab 
                 }
 
                 //fprintf(stderr, "%42s - [%5d, %5d], type = %6s, %6.2f MB\n", name.data(), ne[0], ne[1], ftype == 0 ? "float" : "f16", ggml_nbytes(tensor)/1024.0/1024.0);
-                progress(0.1 + (float(fin.tellg()) / fsize) * 0.9);
+                progress(0.1 + (float(i) + float(fin.tellg()) / fsize) / float(n_parts) * 0.9);
             }
 
 //             fprintf(stderr, " done\n");
