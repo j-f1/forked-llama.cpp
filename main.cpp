@@ -921,7 +921,7 @@ llama_stop llama_predict(gpt_params &params, llama_state &state, bool(^progress)
 
         // deliver text
         for (auto id : embd) {
-            bool should_stop = progress({state.vocab.id_to_token[id]});
+            bool should_stop = progress({state.vocab.id_to_token[id], params});
             if (should_stop) return llama_stop_cancel;
         }
         if (!input_noecho) fflush(stdout);

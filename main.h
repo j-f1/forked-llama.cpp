@@ -88,6 +88,7 @@ typedef CF_ENUM(unsigned int) {
 
 struct llama_progress {
     gpt_vocab::token token;
+    gpt_params &params;
 };
 
 bool llama_bootstrap(const char *model_path, llama_state &state, void(^progress)(float));
