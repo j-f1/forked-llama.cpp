@@ -2,5 +2,6 @@ module LLaMAcpp {
     header "main.h"
     header "utils.h"
     header "ggml.h"
+    header "swift-bridge.hh"
     requires cplusplus
 }
