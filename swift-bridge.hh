@@ -15,8 +15,8 @@
 // Switch to the below and conversions will be baked into the language!
 // -cxx-interoperability-mode=swift-5.9
 
-const NSString *bridge_string(std::string s) {
-    return [NSString stringWithCString:s.c_str() encoding:NSUTF8StringEncoding];
+void bridge_string(std::string s, void(^cb)(const char *str, int length)) {
+    cb(s.c_str(), s.size());
 }
 
 std::string bridge_string(const char *s) {
